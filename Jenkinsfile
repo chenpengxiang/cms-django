@@ -4,9 +4,9 @@ pipeline {
   stages {
     stage('Test') {
       steps{
-        sh 'python3 -m venv env'
+        sh 'python3 -m venv venv'
         dir('backend') {
-          sh '. ../env/bin/activate && pip3 install -r requirements.txt && pylint_runner'
+          sh '. ../venv/bin/activate && pip3 install -r requirements.txt && pylint_runner'
         }
       }
     }

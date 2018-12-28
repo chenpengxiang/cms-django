@@ -10,6 +10,7 @@ pip-delete-this-directory.txt
 .tox/
 .coverage
 .cache
+venv/
 nosetests.xml
 coverage.xml
 

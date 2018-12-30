@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PylintConfigService">
+    <option name="customPylintPath" value="$MODULE_DIR$/venv/Scripts/pylint" />
+    <option name="pylintArguments" value="api cms backend" />
+    <option name="pylintrcPath" value="$MODULE_DIR$/backend/.pylintrc" />
+  </component>
+</project>

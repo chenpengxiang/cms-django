@@ -6,7 +6,7 @@ pipeline {
       steps{
         sh 'python3 -m venv venv'
         dir('backend') {
-          sh '. ../venv/bin/activate && pip3 install -r requirements.txt && pylint_runner'
+          sh '. ../venv/bin/activate && pip3 install -e . && pylint_runner'
         }
       }
     }

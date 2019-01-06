@@ -10,11 +10,8 @@ urlpatterns = [
 
     url(r'pages/$', pages.PageTreeView.as_view(), name='pages'),
     url(r'pages/new$', pages.PageView.as_view(), name='new_page'),
-    url(r'pages/(?P<page_translation_id>[0-9]+)$',
-        pages.PageView.as_view(),
-        name='edit_page'),
-    url(r'pages/(?P<page_translation_id>[0-9]+)/delete$',
-        pages.PageView.as_view(),
+    url(r'pages/(?P<page_translation_id>[0-9]+)$', pages.PageView.as_view(), name='edit_page'),
+    url(r'pages/(?P<page_translation_id>[0-9]+)/delete$', pages.PageView.as_view(),
         name='delete_page'),
     url(r'pages/archive$', pages.archive, name='archived_pages'),
 

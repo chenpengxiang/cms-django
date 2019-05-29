@@ -35,7 +35,7 @@ class OrganizationView(TemplateView):
         organization_id = self.kwargs.get('organization_id', None)
         if organization_id:
             organization = Organization.objects.get(id=organization_id)
-            form = OrganizationForm(initial=organization)
+            form = OrganizationForm(instance=organization)
         else:
             form = OrganizationForm()
         return render(request, self.template_name, {
@@ -45,14 +45,17 @@ class OrganizationView(TemplateView):
 
     def post(self, request, organization_id=None):
         # TODO: error handling
-        form = OrganizationForm(request.POST)
+        if organization_id:
+            organization = Organization.objects.get(id=organization_id)
+            form = OrganizationForm(request.POST, instance=organization)
+            success_message = _('Organization created successfully')
+        else:
+            form = OrganizationForm(request.POST)
+            success_message = _('Organization saved successfully')
+
         if form.is_valid():
-            if organization_id:
-                organization = form.save_organization(organization_id=organization_id)
-                messages.success(request, _('Organization saved successfully.'))
-            else:
-                organization = form.save_organization()
-                messages.success(request, _('Organization created successfully'))
+            form.save()
+            messages.success(request, success_message)
             # TODO: improve messages
         else:
             messages.error(request, _('Errors have occurred.'))

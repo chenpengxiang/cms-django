@@ -4,7 +4,7 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
-from .views import general, registration, pages, regions, languages, language_tree, users, organizations, statistics
+from .views import general, registration, pages, regions, languages, language_tree, users, roles, organizations, statistics
 
 
 urlpatterns = [
@@ -54,6 +54,22 @@ urlpatterns = [
                 r'^delete$',
                 users.UserView.as_view(),
                 name='delete_user'
+            ),
+        ])),
+    ])),
+    url(r'^roles/', include([
+        url(r'^$', roles.RoleListView.as_view(), name='roles'),
+        url(r'^new$', roles.RoleView.as_view(), name='new_role'),
+        url(r'^(?P<role_id>[0-9]+)/', include([
+            url(
+                r'^edit$',
+                roles.RoleView.as_view(),
+                name='edit_role'
+            ),
+            url(
+                r'^delete$',
+                roles.RoleView.as_view(),
+                name='delete_role'
             ),
         ])),
     ])),

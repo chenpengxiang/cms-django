@@ -5,8 +5,8 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 from django.shortcuts import render
-from ...models.user import User
-from .user_form import BaseUserForm, UserForm
+from ...models.user_profile import UserProfile
+from .user_form import UserForm, UserProfileForm
 
 
 @method_decorator(login_required, name='dispatch')
@@ -15,7 +15,7 @@ class UserListView(TemplateView):
     base_context = {'current_menu_item': 'users'}
 
     def get(self, request, *args, **kwargs):
-        users = User.objects.all()
+        users = get_user_model().objects.all()
 
         return render(
             request,
@@ -34,38 +34,54 @@ class UserView(TemplateView):
     def get(self, request, *args, **kwargs):
         user_id = self.kwargs.get('user_id', None)
         if user_id:
-            base_user = get_user_model().objects.get(id=user_id)
-            user = User.objects.get(user=base_user)
-            base_user_form = BaseUserForm(initial=base_user.__dict__)
-            user_form = UserForm(initial=user.__dict__)
+            user = get_user_model().objects.get(id=user_id)
+            user_form = UserForm(instance=user)
+            user_profile = UserProfile.objects.filter(user=user)
+            if user_profile.exists():
+                user_profile_form = UserProfileForm(instance=user_profile.first())
+            else:
+                user_profile_form = UserProfileForm()
         else:
-            base_user_form = BaseUserForm()
             user_form = UserForm()
+            user_profile_form = UserProfileForm()
         return render(request, self.template_name, {
-            'base_user_form': base_user_form,
             'user_form': user_form,
+            'user_profile_form': user_profile_form,
             **self.base_context
         })
 
     def post(self, request, user_id=None):
         # TODO: error handling
-        base_user_form = BaseUserForm(request.POST)
-        user_form = UserForm(request.POST)
-        if base_user_form.is_valid() and user_form.is_valid():
-            if user_id:
-                base_user = base_user_form.save_user(user_id=user_id)
-                user_form.save_user(base_user_id=base_user.id)
-                messages.success(request, _('User saved successfully.'))
-            else:
-                base_user = base_user_form.save_user()
-                user_form.save_user(base_user_id=base_user.id)
-                messages.success(request, _('User created successfully'))
-            # TODO: improve messages
+
+        user = get_user_model().objects.filter(id=user_id).first()
+        if user:
+            user_form = UserForm(request.POST, instance=user)
+            success_message = _('User saved successfully.')
         else:
+            user_form = UserForm(request.POST)
+            success_message = _('User created successfully.')
+
+        user_profile = UserProfile.objects.filter(user=user).first()
+        if user_profile:
+            user_profile_form = UserProfileForm(request.POST, instance=user_profile)
+        else:
+            user_profile_form = UserProfileForm(request.POST)
+
+        if user_form.is_valid() and user_profile_form.is_valid():
+            user = user_form.save()
+            if user_profile:
+                user_profile_form.save()
+            else:
+                user_profile = user_profile_form.save(commit=False)
+                user_profile.user = user
+                user_profile.save()
+            messages.success(request, success_message)
+        else:
+            # TODO: improve messages
             messages.error(request, _('Errors have occurred.'))
 
         return render(request, self.template_name, {
-            'base_user_form': base_user_form,
             'user_form': user_form,
+            'user_profile_form': user_profile_form,
             **self.base_context
         })

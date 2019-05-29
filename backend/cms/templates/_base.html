@@ -159,10 +159,14 @@
 			    <i data-feather="flag" class="absolute"></i>
 			    {% trans 'Languages' %}
 		    </a>
-		    <a href="" class="relative block text-grey-light hover:text-grey-darker hover:bg-integreat">
-			    <i data-feather="users" class="absolute"></i>
-			    {% trans 'User' %}
-		    </a>
+            <a href="{% url 'users' %}" class="relative block text-grey-light hover:text-grey-darker hover:bg-integreat">
+                <i data-feather="users" class="absolute"></i>
+                {% trans 'Users' %}
+            </a>
+            <a href="{% url 'organizations' %}" class="relative block text-grey-light hover:text-grey-darker hover:bg-integreat">
+                <i data-feather="users" class="absolute"></i>
+                {% trans 'Organizations' %}
+            </a>
 		    <a href="" class="relative block text-grey-light hover:text-grey-darker hover:bg-integreat">
 			    <i data-feather="thumbs-up" class="absolute"></i>
 			    {% trans 'Feedback' %}

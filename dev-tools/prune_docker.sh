@@ -1,3 +1,3 @@
 #!/bin/sh
 
-sudo docker-compose down --rmi local
+docker-compose down --rmi local

@@ -5,11 +5,14 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 from django.shortcuts import render
-from ...models.user_profile import UserProfile
+
 from .user_form import UserForm, UserProfileForm
+from ...models.user_profile import UserProfile
+from ...decorators import staff_required
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(staff_required, name='dispatch')
 class UserListView(TemplateView):
     template_name = 'users/list.html'
     base_context = {'current_menu_item': 'users'}
@@ -27,6 +30,7 @@ class UserListView(TemplateView):
         )
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(staff_required, name='dispatch')
 class UserView(TemplateView):
     template_name = 'users/user.html'
     base_context = {'current_menu_item': 'users'}

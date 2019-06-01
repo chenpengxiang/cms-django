@@ -10,11 +10,14 @@ from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
-from ...models import Page, Site, Language
+
 from .page_form import PageForm
+from ...models import Page, Site, Language
+from ...decorators import region_permission_required
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(region_permission_required, name='dispatch')
 class PageView(TemplateView):
     template_name = 'pages/page.html'
     base_context = {'current_menu_item': 'pages'}

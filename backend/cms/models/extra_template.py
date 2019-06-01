@@ -19,3 +19,8 @@ class ExtraTemplate(models.Model):
     post_data = JSONField(max_length=250, null=True)
     created_date = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta():
+        permissions = (
+            ('view_extra_template', 'Can view extra_template'),
+        )

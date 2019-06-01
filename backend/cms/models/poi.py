@@ -42,6 +42,10 @@ class POI(models.Model):
 
         return pois
 
+    class Meta():
+        permissions = (
+            ('view_poi', 'Can view point of interest'),
+        )
 
 class POITranslation(models.Model):
     """Translation of an Point of Interest
@@ -67,3 +71,8 @@ class POITranslation(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(auto_now=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+
+    class Meta():
+        permissions = (
+            ('view_poi_translation', 'Can view point of interest translation'),
+        )

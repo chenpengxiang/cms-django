@@ -19,6 +19,11 @@ class PushNotification(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+    class Meta():
+        permissions = (
+            ('view_push_notification', 'Can view push notification'),
+        )
+
 
 class PushNotificationTranslation(models.Model):
     """Class representing the Translation of a Push Notification
@@ -32,3 +37,8 @@ class PushNotificationTranslation(models.Model):
     push_notification = models.ForeignKey(PushNotification, on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta():
+        permissions = (
+            ('view_push notification translation', 'Can view push notification translation'),
+        )

@@ -25,3 +25,8 @@ class Extra(models.Model):
 
     def post_data(self):
         return self.template.post_data
+
+    class Meta():
+        permissions = (
+            ('view_extra', 'Can view extra'),
+        )

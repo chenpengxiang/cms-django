@@ -17,6 +17,10 @@ class Feedback(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+    class Meta():
+        permissions = (
+            ('view_feedback', 'Can view feedback'),
+        )
 
 class SiteFeedback(Feedback):
     site = models.ForeignKey(Site)

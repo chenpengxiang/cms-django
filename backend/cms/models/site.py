@@ -68,3 +68,8 @@ class Site(models.Model):
         Returns: String
         """
         return self.name
+
+    class Meta():
+        permissions = (
+            ('view_site', 'Can view site'),
+        )

@@ -111,6 +111,10 @@ class Page(MPTTModel):
 
         return pages
 
+    class Meta():
+        permissions = (
+            ('view_page', 'Can view page'),
+        )
 
 class PageTranslation(models.Model):
     """Class defining a Translation of a Page
@@ -152,3 +156,8 @@ class PageTranslation(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta():
+        permissions = (
+            ('view_page_translation', 'Can view page translation'),
+        )

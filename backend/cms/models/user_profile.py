@@ -12,3 +12,8 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    class Meta():
+        permissions = (
+            ('view_user_profile', 'Can view user profile'),
+        )

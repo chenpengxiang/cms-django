@@ -20,6 +20,7 @@ setup(
         "cffi==1.11.5",
         "cryptography==2.3.1",
         "Django==1.11.20",
+        "django-guardian==1.5.1",
         "django-js-asset==1.1.0",
         "django-mptt==0.9.1",
         "django-widget-tweaks==1.4.3",

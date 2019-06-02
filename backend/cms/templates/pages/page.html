@@ -3,6 +3,7 @@
 {% block content %}
 {% load static %}
 {% load widget_tweaks %}
+{% load guardian_tags %}
 <form method="post">
     {% csrf_token %}
     <div class="flex flex-wrap mb-4">
@@ -22,7 +23,10 @@
             </h2>
         </div>
         <div class="w-3/5 flex justify-end">
+	        {% get_obj_perms request.user for page as "page_perms" %}
+	        {% if perms.cms.change_page or "change_page" in page_perms %}
             <input type="submit" name="submit_save" class="{% if public %}bg-blue hover:bg-blue-dark{% else %}bg-grey hover:bg-grey-dark{% endif %} cursor-pointer text-white font-bold py-3 px-4 rounded mr-2" value="{% trans 'Save' %}" />
+	        {% endif %}
             {% if not public %}
                 <input type="submit" name="submit_publish" class="cursor-pointer bg-blue hover:bg-blue-dark text-white font-bold py-3 px-4 rounded" value="{% trans 'Publish' %}" />
             {% endif %}
@@ -40,7 +44,7 @@
                     {% render_field form.text placeholder=text_placeholder class="bg-grey-lighter w-full p-2" %}
                 </div>
             </div>
-            <div class="w-full p-4 rounded border border-solid border-grey-light shadow bg-white">
+            <div class="w-full p-4 mb-4 rounded border border-solid border-grey-light shadow bg-white">
                 <h3 class="mb-2">{% trans 'Embed live content' %}</h3>
                 <input type="text" class="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded mb-2 py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey"
                     placeholder="{% trans 'Search page' %}" />
@@ -57,6 +61,13 @@
 	                {% trans 'Embed page' %}
                 </button>
             </div>
+	        {% if perms.cms.add_page_editor %}
+	        <div class="w-full p-4 mb-4 rounded border border-solid border-grey-light shadow bg-white">
+                <h3 class="mb-2">{% trans 'Additional editors' %}</h3>
+		        <p class="mb-2">{% trans "This affects only users, who don't have the permission to change pages yet." %}</p>
+                {% render_field form.editors class="appearance-none block w-full bg-grey-lighter text-xl text-grey-darkest border border-grey-lighter rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey" %}
+            </div>
+	        {% endif %}
         </div>
         <div class="w-1/3 pl-2">
             <div class="w-full px-4 py-2 rounded border border-solid border-grey-light shadow bg-white">

@@ -114,6 +114,7 @@ class Page(MPTTModel):
     class Meta():
         permissions = (
             ('view_page', 'Can view page'),
+            ('add_page_editor', 'Can add page editor'),
         )
 
 class PageTranslation(models.Model):

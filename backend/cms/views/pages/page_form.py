@@ -4,8 +4,14 @@ Form for creating a page object and page translation object
 
 import sys
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
+
+from guardian.utils import get_anonymous_user
+from guardian.shortcuts import assign_perm, remove_perm, get_users_with_perms
 
 from ...models import Page, PageTranslation, Site, Language
 from ..general import POSITION_CHOICES
@@ -27,6 +33,14 @@ class PageForm(forms.ModelForm):
         (False, _('Private'))
     )
     public = forms.ChoiceField(choices=PUBLIC_CHOICES)
+    permission_change_page = Permission.objects.get(codename='change_page')
+    users_without_permission = get_user_model().objects.exclude(
+        Q(groups__permissions=permission_change_page) |
+        Q(user_permissions=permission_change_page) |
+        Q(is_superuser=True) |
+        Q(id=get_anonymous_user().id)
+    )
+    editors = forms.ModelMultipleChoiceField(queryset=users_without_permission, required=False)
 
     class Meta:
         model = PageTranslation
@@ -123,5 +137,14 @@ class PageForm(forms.ModelForm):
                 page=page,
                 creator=self.user
             )
+
+        old_editors = {user for user, perms in get_users_with_perms(page, attach_perms=True).items() if 'change_page' in perms}
+        new_editors = set(self.cleaned_data['editors'])
+        added_editors = new_editors - old_editors
+        removed_editors = old_editors - new_editors
+        for editor in added_editors:
+            assign_perm('change_page', editor, page)
+        for editor in removed_editors:
+            remove_perm('change_page', editor, page)
 
         return page

@@ -3,15 +3,17 @@
 Returns:
     [type]: [description]
 """
-
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
+
+from guardian.shortcuts import get_users_with_perms
 
 from .page_form import PageForm
 from ...models import Page, Site, Language
@@ -46,11 +48,13 @@ class PageView(PermissionRequiredMixin, TemplateView):
             parent_queryset = parent_queryset.difference(children)
             page_translation = page.get_translation(language.code)
             if page_translation:
+                user_ids = [user.id for user, perms in get_users_with_perms(page, attach_perms=True).items() if 'change_page' in perms]
                 initial.update({
                     'title': page_translation.title,
                     'text': page_translation.text,
                     'status': page_translation.status,
                     'public': page_translation.public,
+                    'editors': get_user_model().objects.filter(id__in=user_ids),
                 })
                 public = page_translation.public
         form = PageForm(initial=initial)
@@ -68,8 +72,13 @@ class PageView(PermissionRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         site_slug = kwargs.get('site_slug')
         page_id = kwargs.get('page_id', None)
+
         if page_id:
-            if not request.user.has_perm('cms.change_page'):
+            page = Page.objects.get(id=page_id)
+            if not (
+                request.user.has_perm('cms.change_page') or
+                request.user.has_perm('cms.change_page', page)
+            ):
                 raise PermissionDenied
         else:
             if not request.user.has_perm('cms.add_page'):

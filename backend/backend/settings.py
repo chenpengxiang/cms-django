@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'mptt',
+    'guardian',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,15 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+
+# Authentication backends
+# https://django-guardian.readthedocs.io/en/stable/configuration.html
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 
 # Password validation

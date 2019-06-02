@@ -4,8 +4,10 @@ Returns:
     [type]: [description]
 """
 
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
@@ -18,7 +20,10 @@ from ...decorators import region_permission_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(region_permission_required, name='dispatch')
-class PageView(TemplateView):
+class PageView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_page'
+    raise_exception = True
+
     template_name = 'pages/page.html'
     base_context = {'current_menu_item': 'pages'}
 
@@ -63,6 +68,13 @@ class PageView(TemplateView):
     def post(self, request, *args, **kwargs):
         site_slug = kwargs.get('site_slug')
         page_id = kwargs.get('page_id', None)
+        if page_id:
+            if not request.user.has_perm('cms.change_page'):
+                raise PermissionDenied
+        else:
+            if not request.user.has_perm('cms.add_page'):
+                raise PermissionDenied
+
         language_code = kwargs.get('language_code')
         # TODO: error handling
         form = PageForm(request.POST, user=request.user)

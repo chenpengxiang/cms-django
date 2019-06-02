@@ -10,9 +10,6 @@ def staff_required(function):
         # superusers and staff have access to this areas
         if user.is_superuser or user.is_staff:
             return function(request, *args, **kwargs)
-        regions = user.profile.regions
-        if regions.exist():
-            return redirect('dashboard', site_slug=regions.first().slug)
         raise PermissionDenied
     wrap.__doc__ = function.__doc__
     wrap.__name__ = function.__name__

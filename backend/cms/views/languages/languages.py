@@ -1,5 +1,7 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -12,7 +14,10 @@ from ...decorators import staff_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class LanguageListView(TemplateView):
+class LanguageListView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_language'
+    raise_exception = True
+
     template_name = 'languages/list.html'
     base_context = {'current_menu_item': 'languages'}
 
@@ -30,7 +35,10 @@ class LanguageListView(TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class LanguageView(TemplateView):
+class LanguageView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_language'
+    raise_exception = True
+
     template_name = 'languages/language.html'
     base_context = {'current_menu_item': 'languages'}
     language_code = None
@@ -38,6 +46,8 @@ class LanguageView(TemplateView):
     def get(self, request, *args, **kwargs):
         self.language_code = self.kwargs.get('language_code', None)
         if self.language_code:
+            if not request.user.has_perm('cms.change_language'):
+                raise PermissionDenied
             language = Language.objects.get(code=self.language_code)
             form = LanguageForm(initial={
                 'name': language.name,
@@ -45,6 +55,8 @@ class LanguageView(TemplateView):
                 'text_direction': language.text_direction,
             })
         else:
+            if not request.user.has_perm('cms.add_language'):
+                raise PermissionDenied
             form = LanguageForm()
         return render(request, self.template_name, {
             'form': form, **self.base_context})
@@ -54,9 +66,13 @@ class LanguageView(TemplateView):
         form = LanguageForm(request.POST)
         if form.is_valid():
             if language_code:
+                if not request.user.has_perm('cms.change_language'):
+                    raise PermissionDenied
                 form.save_language(language_code=language_code)
                 messages.success(request, _('Language saved successfully.'))
             else:
+                if not request.user.has_perm('cms.add_language'):
+                    raise PermissionDenied
                 form.save_language()
                 messages.success(request, _('Language created successfully'))
             # TODO: improve messages

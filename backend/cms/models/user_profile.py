@@ -15,5 +15,5 @@ class UserProfile(models.Model):
 
     class Meta():
         permissions = (
-            ('view_user_profile', 'Can view user profile'),
+            ('view_userprofile', 'Can view user profile'),
         )

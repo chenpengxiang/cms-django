@@ -1,6 +1,8 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -13,7 +15,10 @@ from ...decorators import staff_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class UserListView(TemplateView):
+class UserListView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_userprofile'
+    raise_exception = True
+
     template_name = 'users/list.html'
     base_context = {'current_menu_item': 'users'}
 
@@ -31,7 +36,10 @@ class UserListView(TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class UserView(TemplateView):
+class UserView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_userprofile'
+    raise_exception = True
+
     template_name = 'users/user.html'
     base_context = {'current_menu_item': 'users'}
 
@@ -67,8 +75,12 @@ class UserView(TemplateView):
 
         user_profile = UserProfile.objects.filter(user=user).first()
         if user_profile:
+            if not request.user.has_perm('cms.change_userprofile'):
+                raise PermissionDenied
             user_profile_form = UserProfileForm(request.POST, instance=user_profile)
         else:
+            if not request.user.has_perm('cms.add_userprofile'):
+                raise PermissionDenied
             user_profile_form = UserProfileForm(request.POST)
 
         if user_form.is_valid() and user_profile_form.is_valid():

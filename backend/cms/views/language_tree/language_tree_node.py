@@ -4,8 +4,10 @@ Returns:
     [type]: [description]
 """
 
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
@@ -18,7 +20,10 @@ from ...decorators import region_permission_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(region_permission_required, name='dispatch')
-class LanguageTreeNodeView(TemplateView):
+class LanguageTreeNodeView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_languagetreenode'
+    raise_exception = True
+
     template_name = 'language_tree/tree_node.html'
     base_context = {'current_menu_item': 'language_tree'}
 
@@ -31,6 +36,8 @@ class LanguageTreeNodeView(TemplateView):
             language_tree_nodes__in=parent_queryset.exclude(id=language_tree_node_id)
         )
         if language_tree_node_id:
+            if not request.user.has_perm('cms.change_languagetreenode'):
+                raise PermissionDenied
             language_tree_node = LanguageTreeNode.objects.get(id=language_tree_node_id)
             children = language_tree_node.get_descendants(include_self=True)
             parent_queryset = parent_queryset.difference(children)
@@ -40,6 +47,8 @@ class LanguageTreeNodeView(TemplateView):
                 'active': language_tree_node.active,
             })
         else:
+            if not request.user.has_perm('cms.add_languagetreenode'):
+                raise PermissionDenied
             form = LanguageTreeNodeForm()
         form.fields['parent'].queryset = parent_queryset
         form.fields['language'].queryset = language_queryset
@@ -51,11 +60,15 @@ class LanguageTreeNodeView(TemplateView):
         form = LanguageTreeNodeForm(data=request.POST, site_slug=site_slug)
         if form.is_valid():
             if language_tree_node_id:
+                if not request.user.has_perm('cms.change_languagetreenode'):
+                    raise PermissionDenied
                 form.save_language_node(
                     language_tree_node_id=language_tree_node_id,
                 )
                 messages.success(request, _('Language tree node was saved successfully.'))
             else:
+                if not request.user.has_perm('cms.add_languagetreenode'):
+                    raise PermissionDenied
                 language_tree_node = form.save_language_node()
                 messages.success(request, _('Language tree node was created successfully.'))
                 return redirect('edit_language_tree_node', **{

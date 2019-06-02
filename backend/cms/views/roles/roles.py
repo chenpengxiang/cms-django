@@ -1,5 +1,7 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Group as Role
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
@@ -12,7 +14,10 @@ from ...decorators import staff_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class RoleListView(TemplateView):
+class RoleListView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'auth.add_group'
+    raise_exception = True
+
     template_name = 'roles/list.html'
     base_context = {'current_menu_item': 'roles'}
 
@@ -30,7 +35,10 @@ class RoleListView(TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class RoleView(TemplateView):
+class RoleView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'auth.add_group'
+    raise_exception = True
+
     template_name = 'roles/role.html'
     base_context = {'current_menu_item': 'roles'}
 
@@ -49,10 +57,14 @@ class RoleView(TemplateView):
     def post(self, request, role_id=None):
         # TODO: error handling
         if role_id:
+            if not request.user.has_perm('auth.change_group'):
+                raise PermissionDenied
             role = Role.objects.get(id=role_id)
             form = RoleForm(request.POST, instance=role)
             success_message = _('Role saved successfully')
         else:
+            if not request.user.has_perm('auth.add_group'):
+                raise PermissionDenied
             form = RoleForm(request.POST)
             success_message = _('Role created successfully')
         if form.is_valid():

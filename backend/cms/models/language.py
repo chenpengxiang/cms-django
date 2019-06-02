@@ -82,7 +82,7 @@ class LanguageTreeNode(MPTTModel):
     class Meta:
         unique_together = (('language', 'site', ), )
         permissions = (
-            ('view_language_tree_node', 'Can view language tree node'),
+            ('view_languagetreenode', 'Can view language tree node'),
         )
 
     def __str__(self):

@@ -1,5 +1,7 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -12,7 +14,10 @@ from ...decorators import staff_required
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class RegionListView(TemplateView):
+class RegionListView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_region'
+    raise_exception = True
+
     template_name = 'regions/list.html'
     base_context = {'current_menu_item': 'regions'}
 
@@ -30,7 +35,10 @@ class RegionListView(TemplateView):
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(staff_required, name='dispatch')
-class RegionView(TemplateView):
+class RegionView(PermissionRequiredMixin, TemplateView):
+    permission_required = 'cms.view_region'
+    raise_exception = True
+
     template_name = 'regions/region.html'
     base_context = {'current_menu_item': 'regions'}
     region_slug = None
@@ -64,9 +72,13 @@ class RegionView(TemplateView):
         form = RegionForm(request.POST)
         if form.is_valid():
             if region_slug:
+                if not request.user.has_perm('cms.change_region'):
+                    raise PermissionDenied
                 form.save_region(region_slug=region_slug)
                 messages.success(request, _('Region saved successfully.'))
             else:
+                if not request.user.has_perm('cms.add_region'):
+                    raise PermissionDenied
                 form.save_region()
                 messages.success(request, _('Region created successfully'))
             # TODO: improve messages

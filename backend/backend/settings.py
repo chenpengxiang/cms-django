@@ -94,6 +94,11 @@ DATABASES = {
     }
 }
 
+# Directory for initial database contents
+
+FIXTURE_DIRS = (
+    os.path.join(BASE_DIR, 'cms/fixtures/'),
+)
 
 # Authentication backends
 # https://django-guardian.readthedocs.io/en/stable/configuration.html

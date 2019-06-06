@@ -30,6 +30,7 @@ class SBSPageView(TemplateView):
             site__slug=site.slug
         )
         initial = {}
+        source = {}
         public = False
 
         if page:
@@ -71,81 +72,28 @@ class SBSPageView(TemplateView):
     def post(self, request, *args, **kwargs):
         site_slug = kwargs.get('site_slug')
         page_id = kwargs.get('page_id', None)
-        language_code = kwargs.get('language_code')
+        full_language_code = kwargs.get('language_code')
+        language_code = full_language_code.split('__')[1]
         # TODO: error handling
         form = SBSPageForm(request.POST, user=request.user)
         if form.is_valid():
-            if form.data.get('submit_publish'):
-                page = form.save_page(
-                    site_slug=site_slug,
-                    language_code=language_code,
-                    page_id=page_id,
-                    publish=True
-                )
-                if page_id:
-                    messages.success(request, _('Page was successfully published.'))
-                else:
-                    page_id = page.id
-                    messages.success(request, _('Page was successfully created and published.'))
-            elif form.data.get('submit_archive'):
-                page = form.save_page(
-                        site_slug=site_slug,
-                        language_code=language_code,
-                        page_id=page_id,
-                        archived=True
-                    )
-                if page_id:
-                    messages.success(request, _('Page was successfully saved.'))
-                else:
-                    page_id = page.id
-                    messages.success(request, _('Page was successfully created.'))
+            page = form.save_page(
+                site_slug=site_slug,
+                language_code=language_code,
+                page_id=page_id,
+                publish=False
+            )
+            if page_id:
+                messages.success(request, _('Page was successfully saved.'))
             else:
-                page = form.save_page(
-                    site_slug=site_slug,
-                    language_code=language_code,
-                    page_id=page_id,
-                    publish=False
-                )
-                if page_id:
-                    messages.success(request, _('Page was successfully saved.'))
-                else:
-                    page_id = page.id
-                    messages.success(request, _('Page was successfully created.'))
+                page_id = page.id
+                messages.success(request, _('Page was successfully created.'))
         else:
             messages.error(request, _('Errors have occurred.'))
         if page_id:
-            return redirect('edit_page', **{
+            return redirect('sbs_edit_page', **{
                 'page_id': page_id,
                 'site_slug': site_slug,
-                'language_code': language_code,
+                'language_code': full_language_code,
             })
         return redirect('new_page', **kwargs)
-
-
-@login_required
-def archive_page(request, page_id, site_slug, language_code):
-    page = Page.objects.get(id=page_id)
-    page.public = False
-    page.archived = True
-    page.save()
-
-    messages.success(request, _('Page was successfully archived.'))
-
-    return redirect('pages', **{
-                'site_slug': site_slug,
-                'language_code': language_code,
-            })
-
-
-@login_required
-def restore_page(request, page_id, site_slug, language_code):
-    page = Page.objects.get(id=page_id)
-    page.archived = False
-    page.save()
-
-    messages.success(request, _('Page was successfully restored.'))
-
-    return redirect('pages', **{
-                'site_slug': site_slug,
-                'language_code': language_code,
-            })

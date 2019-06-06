@@ -37,20 +37,29 @@ class SBSPageView(TemplateView):
             # remove children from possible parents
             children = page.get_descendants(include_self=True)
             parent_queryset = parent_queryset.difference(children)
-            page_translation = page.get_translation(source_language.code)
-            if page_translation:
+            source_page_translation = page.get_translation(source_language.code)
+            target_page_translation = page.get_translation(target_language.code)
+            if source_page_translation:
+                source = {
+                    'title': source_page_translation.title,
+                    'text': source_page_translation.text,
+                    'status': source_page_translation.status,
+                    'public': source_page_translation.public,
+                }
+            if target_page_translation:
                 initial.update({
-                    'title': page_translation.title,
-                    'text': page_translation.text,
-                    'status': page_translation.status,
-                    'public': page_translation.public,
+                    'title': target_page_translation.title,
+                    'text': target_page_translation.text,
+                    'status': target_page_translation.status,
+                    'public': target_page_translation.public,
                 })
-                public = page_translation.public
+                public = target_page_translation.public
         form = SBSPageForm(initial=initial)
         form.fields['parent'].queryset = parent_queryset
 
         return render(request, self.template_name, {
             'form': form,
+            'source': source,
             'public': public,
             'page': page,
             'source_language': source_language,

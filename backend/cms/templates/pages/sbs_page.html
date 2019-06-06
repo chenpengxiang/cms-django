@@ -1,0 +1,91 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% block content %}
+{% load static %}
+{% load widget_tweaks %}
+<form method="post">
+    {% csrf_token %}
+    <div class="flex flex-wrap mb-4">
+        <div class="w-2/5 flex flex-wrap flex-col justify-center">
+            <h2 class="heading font-normal">
+                {% if page %}
+		            {% if form.title.value %}
+			            {% with form.title.value as page_title %}
+			            {% blocktrans %}Edit page "{{ page_title }}"{% endblocktrans %}
+			            {% endwith %}
+		            {% else %}
+			            {% trans 'Create new translation' %}
+		            {% endif %}
+                {% else %}
+	                {% trans 'Create new page' %}
+                {% endif %}
+            </h2>
+        </div>
+        <div class="w-3/5 flex justify-end">
+            <input type="submit" name="submit_save" class="{% if public %}bg-blue hover:bg-blue-dark{% else %}bg-grey hover:bg-grey-dark{% endif %} cursor-pointer text-white font-bold py-3 px-4 rounded mr-2" value="{% trans 'Save' %}" />
+            {% if not public %}
+                <input type="submit" name="submit_publish" class="cursor-pointer bg-blue hover:bg-blue-dark text-white font-bold py-3 px-4 rounded" value="{% trans 'Publish' %}" />
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flex flex-wrap">
+        <div class="w-1/2 pr-2">
+            <!--{{form.errors}}-->
+            <div class="w-full p-4 mb-4 rounded border border-solid border-grey-light shadow bg-white">
+	            {% trans 'Insert title here' as title_placeholder%}
+                {% render_field form.title placeholder=title_placeholder class="appearance-none block w-full bg-grey-lighter text-xl text-grey-darkest border border-grey-lighter rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey" %}
+	            <div class="mt-4">
+	                {% trans 'Insert content here' as text_placeholder%}
+                    {% render_field form.text placeholder=text_placeholder class="bg-grey-lighter w-full p-2" %}
+                </div>
+            </div>
+            <div class="w-full p-4 rounded border border-solid border-grey-light shadow bg-white">
+                <h3 class="mb-2">{% trans 'Embed live content' %}</h3>
+                <input type="text" class="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded mb-2 py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey"
+                    placeholder="{% trans 'Search page' %}" />
+                <div class="relative my-2">
+                    <select class="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darkest py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-grey">
+                        <option>{% trans 'Embed before content' %}</option>
+                        <option>{% trans 'Embed after content' %}</option>
+                    </select>
+                    <div class="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darkest">
+                        <img src="{% static 'svg/select-down-arrow.svg' %}" class="fill-current h-4 w-4" />
+                    </div>
+                </div>
+                <button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+	                {% trans 'Embed page' %}
+                </button>
+            </div>
+        </div>
+        <div class="w-1/2 pr-2">
+            {{form.errors}}
+            <div class="w-full p-4 mb-4 rounded border border-solid border-grey-light shadow bg-white">
+	            {% trans 'Insert title here' as title_placeholder%}
+                {% render_field form.title placeholder=title_placeholder class="appearance-none block w-full bg-grey-lighter text-xl text-grey-darkest border border-grey-lighter rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey" %}
+	            <div class="mt-4">
+	                {% trans 'Insert content here' as text_placeholder%}
+                    {% render_field form.text placeholder=text_placeholder class="bg-grey-lighter w-full p-2" %}
+                </div>
+            </div>
+            <div class="w-full p-4 rounded border border-solid border-grey-light shadow bg-white">
+                <h3 class="mb-2">{% trans 'Embed live content' %}</h3>
+                <input type="text" class="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded mb-2 py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-grey"
+                    placeholder="{% trans 'Search page' %}" />
+                <div class="relative my-2">
+                    <select class="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darkest py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-grey">
+                        <option>{% trans 'Embed before content' %}</option>
+                        <option>{% trans 'Embed after content' %}</option>
+                    </select>
+                    <div class="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darkest">
+                        <img src="{% static 'svg/select-down-arrow.svg' %}" class="fill-current h-4 w-4" />
+                    </div>
+                </div>
+                <button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded">
+	                {% trans 'Embed page' %}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
